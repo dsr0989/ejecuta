@@ -1,0 +1,33 @@
+- name: linux
+  hosts: linux
+  serial: 1
+  tasks:
+
+    - name: Copiando script a Maquinas remotas
+      copy: src=fun.sh
+            dest=/tmp/script
+            remote_src=no
+            mode=0775
+
+    - name: Creando Archivos Locales
+      file:
+        dest: /tmp/resultados
+        state: touch
+      delegate_to: localhost
+
+    - name: Ejecutando Script
+      shell: /tmp/script
+      register: foo_result
+
+    - name: Guardando Salidas
+      lineinfile:
+        dest: /tmp/resultados
+        line: "{{ foo_result }}"
+        insertafter: EOF
+      delegate_to: localhost
+
+    - name: Generando reporte
+      shell: echo  "HOSTNAME ITM TSM DB2 APM WAS SCM JBOSS MQM" >  a;cat /tmp/resultados  |  awk '{print $9 " " $10 " " $11 " " $12 " " $13 " " $14 " " $15 " " $16 " " $17}' >> a 
+      delegate_to: localhost
+
+
